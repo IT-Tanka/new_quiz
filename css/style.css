@@ -78,6 +78,13 @@ button{
   font-size: 18px;
   display: block;
   margin: 0 auto;
+  transition-property:background-color, color;
+  transition-duration: 0.24s;
+  transition-timing-function: ease-in-out;
+}
+.main__btn:hover{
+  background-color: #84cbe2;
+  color:#FFFFFF;
 }
 .selection{
   padding: 50px;
@@ -119,6 +126,9 @@ button{
 }
 .selection__theme:not(:last-child){
   margin-right: 20px;
+}
+.selection__theme:hover{
+  background: #d1e6eb;
 }
 .selection__result{
   width: min-content;
@@ -288,8 +298,4 @@ button{
 .result__text {
   font-weight: 600;
   font-size: 18px;
-}
-.main__btn {
-}
-.result__return {
 }
