@@ -29,17 +29,17 @@ const getData=()=>{
         {
           type:'radio',
           question:'вопрос 3-1',
-          answers:["неправильный", "правильный", "неправильный", "неправильный"]
+          answers:["правильный", "неправильный", "неправильный", "неправильный"]
         },
         {
           type:'radio',
           question:'вопрос 4-1',
-          answers:["неправильный", "правильный", "неправильный", "неправильный"],
+          answers:["правильный", "неправильный", "неправильный", "неправильный"],
         },
         {
           type:'radio',
           question:'вопрос 5-1',
-          answers:["неправильный", "правильный", "неправильный", "неправильный"]
+          answers:["правильный", "неправильный", "неправильный", "неправильный"]
         },
         {
           type:'checkbox',
@@ -62,12 +62,12 @@ const getData=()=>{
         {
           type:'radio',
           question:'вопрос 1-2',
-          answers:["неправильный", "правильный", "неправильный", "неправильный"]
+          answers:["правильный", "неправильный", "неправильный", "неправильный"]
         },
         {
           type:'checkbox',
           question:'вопрос 2-2',
-          answers:["правильный1", "правильный2", "неправильный1", "неправильный2"],
+          answers:["правильный1", "правильный2", "неправильный", "неправильный"],
           correct:'2'
         },
         {
@@ -86,7 +86,7 @@ const getData=()=>{
         {
           type:'radio',
           question:'вопрос 5-2',
-          answers:["неправильный", "правильный", "неправильный", "неправильный"]
+          answers:["правильный", "неправильный", "неправильный", "неправильный"]
         },
         
       ]
@@ -106,7 +106,7 @@ const hideElem=elem=>{
     }
   };
   requestAnimationFrame(animation);
-}
+};
 const renderTheme=themes=>{
   const list=document.querySelector('.selection__list');
   list.textContent='';
@@ -137,16 +137,37 @@ const renderTheme=themes=>{
   }
   return(buttons);
 };
+const shuffle=array=>{
+  const newArray=[...array];
+  for(let i=newArray.length-1; i>0; i-=1){
+    let j=Math.floor(Math.random()*(i+1));
+    [newArray[i], newArray[j]]=[newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
+const createKeyAnswers=data=>{
+  const keys=[];
+  for(let i=0; i<data.answers.length;i++){
+    if (data.type==='radio'){
+      keys.push([data.answers[i], !i]);
+    }else{
+      keys.push([data.answers[i], i<data.correct]);
+    }
+  }
+  return shuffle(keys);
+};
 const createAnswer=data=>{
   const type=data.type;
-  return data.answers.map(item=>{
+  const answers=createKeyAnswers(data);
+  return answers.map(item=>{
     const label=document.createElement('label');
     label.className='answer';
     const input=document.createElement('input');
     input.type=type;
     input.name='answer';
     input.className=`answer__${type}`;
-    const text=document.createTextNode(item);
+    const text=document.createTextNode(item[0]);
     label.append(input, text);
     return label;
   });
@@ -183,18 +204,25 @@ const renderQuiz=quiz=>{
     form.append(fieldset, button);
     questionBox.append(form);
 
-    // form.addEventListener('submit',()=>{
-    //   let ok=false;
-    //   const answer=[form.answer].map(input=>{
-    //     if(input.checked) ok=true;
-    //     return input.checked ? input.value : false;
-    //   });
-    //   if (ok){
-    //     console.log(answer);
-    //   }else{
-    //     console.error('не выбран ни один ответ');
-    //   }
-    // });
+    form.addEventListener('submit',(event)=>{
+      event.preventDefault();
+      let ok=false;
+      const answer=[...form.answer].map(input=>{
+        if(input.checked) ok=true;
+        return input.checked ? input.value : false;
+      });
+      if (ok){
+        console.log(answer);
+        if (questionCount<quiz.list.length){showQuestion();}
+          else {showResult();}
+      }else{
+        console.error('не выбран ни один ответ');
+        form.classList.add('main__form_question_error');
+        setTimeout(()=>{
+          form.classList.remove('main__form_question_error');
+        },1000);
+      }
+    });
   }; 
   showQuestion();
 
@@ -202,7 +230,7 @@ const renderQuiz=quiz=>{
 };
 const addClick=(buttons, data)=>{
 
-  buttons.forEach(btn => {
+  buttons.forEach( btn => {
     btn.addEventListener('click', ()=>{
       const quiz=data.find(item=>item.id===btn.dataset.id);
       renderQuiz(quiz);
